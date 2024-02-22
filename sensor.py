@@ -21,6 +21,14 @@ def store_sensor_data():
     
     return "Data stored successfully", 200
 
+@app.route('/delete-sensor-data', methods=['POST'])
+def delete_sensor_data():
+    for filename in os.listdir(sensor_data_dir):
+        file_path = os.path.join(sensor_data_dir, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+    return "All sensor data deleted", 200
+
 @app.route('/')
 def index():
     files = sorted(os.listdir(sensor_data_dir), reverse=True)[:10]  # Sort and get the latest 10 files
@@ -45,7 +53,18 @@ def index():
         <title>Sensor Data with addition</title>
         <!-- Include ApexCharts -->
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+            <script>
+    function deleteSensorData() {{
+        fetch('/delete-sensor-data', {{ method: 'POST' }})
+        .then(response => response.text())
+        .then(data => {{
+            alert(data);
+            location.reload(); // Reload the page to update the chart
+        }});
+    }}
+    </script>
     </head>
+    
     <body>
         <h1>Sensor Data Chart over time</h1>
         <div id="chart"></div>
@@ -79,6 +98,8 @@ def index():
             var chart = new ApexCharts(document.querySelector("#chart"), options);
             chart.render();
         </script>
+
+        <button onclick="deleteSensorData()">Delete All Sensor Data</button>
     </body>
     </html>
     """
