@@ -43,10 +43,10 @@ def index():
     # Sort the data by timestamp
     series_data.sort(key=lambda x: x[0])
 
-    # Correcting the format for JavaScript and converting to 12-hour format
-    series_data_js = str([[datetime.fromtimestamp(epoch/1000).strftime('%Y-%m-%d %I:%M:%S %p'), value] for epoch, value in series_data]).replace("'", "")
+    # Prepare data for ApexCharts - using timestamp for x-axis
+    series_data_js = str([[epoch, value] for epoch, value in series_data]).replace("'", "")
 
-    # HTML content
+    # HTML content with ApexCharts
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -91,7 +91,7 @@ def index():
                 }},
                 tooltip: {{
                     x: {{
-                        format: 'dd MMM yyyy hh:mm:ss TT'
+                        format: 'dd MMM yyyy HH:mm:ss'
                     }}
                 }}
             }};
@@ -106,7 +106,7 @@ def index():
                 <th>Time</th>
                 <th>Data</th>
             </tr>
-            {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %I:%M:%S %p')}</td><td>{value}</td></tr>" for epoch, value in series_data[-10:])}
+            {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{value}</td></tr>" for epoch, value in series_data[-10:])}
         </table>
 
         <button onclick="deleteSensorData()">Delete All Sensor Data</button>
@@ -117,3 +117,4 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
