@@ -12,9 +12,9 @@ os.makedirs(sensor_data_dir, exist_ok=True)
 @app.route('/store-sensor-data', methods=['POST'])
 def store_sensor_data():
     number = request.data.decode()
-    epoch_time = int(time.time() * 1000)  # milliseconds since epoch
+    epoch_time = int(time.time())  # seconds since epoch in local time
     current_time = datetime.now()
-    filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
+    filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Daily files
     
     with open(filename, 'a') as file:
         file.write(f"{epoch_time},{number}\n")
@@ -43,8 +43,12 @@ def index():
     # Sort the data by timestamp
     series_data.sort(key=lambda x: x[0])
 
-    # Prepare data for ApexCharts - using timestamp for x-axis
-    series_data_js = str([[epoch, value] for epoch, value in series_data]).replace("'", "")
+    # Inside the index function
+    series_data_js = str([[epoch * 1000, value] for epoch, value in series_data]).replace("'", "")  # Convert to milliseconds for JavaScript
+
+    # And for the table
+    {"".join(f"<tr><td>{datetime.fromtimestamp(epoch).strftime('%Y-%m-%d %I:%M:%S %p')}</td><td>{value}</td></tr>" for epoch, value in series_data[-10:])}
+
 
     # HTML content with ApexCharts
     html_content = f"""
