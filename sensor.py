@@ -14,7 +14,7 @@ def store_sensor_data():
     number = request.data.decode()
     epoch_time = int(time.time() * 1000)  # milliseconds since epoch
     current_time = datetime.now()
-    filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d-%H')}.txt"
+    filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
     
     with open(filename, 'a') as file:
         file.write(f"{epoch_time},{number}\n")
@@ -31,21 +31,22 @@ def delete_sensor_data():
 
 @app.route('/')
 def index():
-    files = sorted(os.listdir(sensor_data_dir), reverse=True)[:10]  # Sort and get the latest 10 files
     series_data = []
-
-    for filename in files:
+    
+    # Read all files and accumulate data
+    for filename in sorted(os.listdir(sensor_data_dir)):
         with open(f"{sensor_data_dir}/{filename}", 'r') as file:
             for line in file:
                 epoch, value = line.strip().split(',')
-                # Convert epoch to milliseconds since Unix epoch (for JavaScript)
-                timestamp = int(epoch)
-                series_data.append([timestamp, int(value)])
+                series_data.append([int(epoch), int(value)])
     
-    # Correcting the format for JavaScript
-    series_data_js = str(series_data).replace("'", "")
+    # Sort the data by timestamp
+    series_data.sort(key=lambda x: x[0])
 
-    # Serving an HTML page with the sensor data and an ApexChart
+    # Correcting the format for JavaScript and converting to 12-hour format
+    series_data_js = str([[datetime.fromtimestamp(epoch/1000).strftime('%Y-%m-%d %I:%M:%S %p'), value] for epoch, value in series_data]).replace("'", "")
+
+    # HTML content
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -53,55 +54,16 @@ def index():
         <title>Sensor Data with addition</title>
         <!-- Include ApexCharts -->
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-            <script>
-    function deleteSensorData() {{
-        fetch('/delete-sensor-data', {{ method: 'POST' }})
-        .then(response => response.text())
-        .then(data => {{
-            alert(data);
-            location.reload(); // Reload the page to update the chart
-        }});
-    }}
-
-           var options = {{
-            series: [{{
-                "name": 'Sensor Value',
-                "data": {series_data_js}
-            }}],
-            chart: {{
-                type: 'line',
-                height: 350
-            }},
-            xaxis: {{
-                type: 'datetime',
-            }},
-            stroke: {{
-                curve: 'smooth'
-            }},
-            title: {{
-                text: 'Sensor Data Over Time',
-                align: 'left'
-            }},
-            tooltip: {{
-                x: {{
-                    format: 'dd MMM yyyy HH:mm:ss'
-                }}
-            }}
-        }};
-
-        var chart = new ApexCharts(document.querySelector("#chart"), options);
-        chart.render();
-    </script>
-        <h2>Latest Sensor Data</h2>
-    <table border="1">
-        <tr>
-            <th>Time</th>
-            <th>Data</th>
-        </tr>
-        {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{value}</td></tr>" for epoch, value in series_data[-10:])}
-    </table>
-
-    <button onclick="deleteSensorData()">Delete All Sensor Data</button>
+        <script>
+        function deleteSensorData() {{
+            fetch('/delete-sensor-data', {{ method: 'POST' }})
+            .then(response => response.text())
+            .then(data => {{
+                alert(data);
+                location.reload(); // Reload the page to update the chart
+            }});
+        }}
+        </script>
     </head>
     
     <body>
@@ -129,7 +91,7 @@ def index():
                 }},
                 tooltip: {{
                     x: {{
-                        format: 'dd MMM yyyy HH:mm:ss'
+                        format: 'dd MMM yyyy hh:mm:ss TT'
                     }}
                 }}
             }};
@@ -137,6 +99,15 @@ def index():
             var chart = new ApexCharts(document.querySelector("#chart"), options);
             chart.render();
         </script>
+
+        <h2>Latest Sensor Data</h2>
+        <table border="1">
+            <tr>
+                <th>Time</th>
+                <th>Data</th>
+            </tr>
+            {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %I:%M:%S %p')}</td><td>{value}</td></tr>" for epoch, value in series_data[-10:])}
+        </table>
 
         <button onclick="deleteSensorData()">Delete All Sensor Data</button>
     </body>
