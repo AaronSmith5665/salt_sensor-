@@ -62,7 +62,46 @@ def index():
             location.reload(); // Reload the page to update the chart
         }});
     }}
+
+           var options = {{
+            series: [{{
+                "name": 'Sensor Value',
+                "data": {series_data_js}
+            }}],
+            chart: {{
+                type: 'line',
+                height: 350
+            }},
+            xaxis: {{
+                type: 'datetime',
+            }},
+            stroke: {{
+                curve: 'smooth'
+            }},
+            title: {{
+                text: 'Sensor Data Over Time',
+                align: 'left'
+            }},
+            tooltip: {{
+                x: {{
+                    format: 'dd MMM yyyy HH:mm:ss'
+                }}
+            }}
+        }};
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
     </script>
+        <h2>Latest Sensor Data</h2>
+    <table border="1">
+        <tr>
+            <th>Time</th>
+            <th>Data</th>
+        </tr>
+        {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{value}</td></tr>" for epoch, value in series_data[-10:])}
+    </table>
+
+    <button onclick="deleteSensorData()">Delete All Sensor Data</button>
     </head>
     
     <body>
