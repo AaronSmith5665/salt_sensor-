@@ -8,7 +8,7 @@ sensor_data_dir = "sensor-data"
 water_level_data_dir = "water-level-data"
 regen_data_dir = "regen-data"
 tank_size_file = "tank_size.txt"
-salt_refill_file = "salt_refill.txt"
+salt_refill_file = "salt_refill.txt" 
 
 # Ensure the data directories exist
 os.makedirs(sensor_data_dir, exist_ok=True)
@@ -45,6 +45,15 @@ def store_water_level():
     with open(filename, 'a') as file:
         file.write(f"{epoch_time},{level}\n")
     
+    # Check if the water level is above a certain threshold
+    if int(level) > 0.732:
+        # Send a message to the service worker to show a notification
+        message = {
+            "title": "Water Level Alert",
+            "body": "The water level is approaching overflow."
+        }
+        # You need to implement the logic to send this message to the service worker
+        
     return "Water level data stored successfully", 200
 
 @app.route('/store-regen-signal', methods=['POST'])
