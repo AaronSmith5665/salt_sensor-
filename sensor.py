@@ -16,6 +16,8 @@ os.makedirs(water_level_data_dir, exist_ok=True)
 os.makedirs(regen_data_dir, exist_ok=True)
 
 sensor_data = []
+water_level_data = []
+regen_data = []
 
 @app.route('/store-sensor-data', methods=['POST','GET'])
 def store_sensor_data():
@@ -49,42 +51,48 @@ def delete_sensor_data():
             os.remove(file_path)
     return "All sensor data deleted", 200
 
-@app.route('/store-water-level', methods=['POST'])
-def store_water_level():
-    level = request.data.decode()
-    epoch_time = int(time.time() * 1000)  # milliseconds since epoch
-    current_time = datetime.now()
-    filename = f"{water_level_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
-    
-    with open(filename, 'a') as file:
-        file.write(f"{epoch_time},{level}\n")
-    
-    # Check if the water level is above a certain threshold
-    if int(level) > 0.732:
-        # Send a message to the service worker to show a notification
-        message = {
-            "title": "Water Level Alert",
-            "body": "The water level is approaching overflow."
-        }
-        # You need to implement the logic to send this message to the service worker
-        
-    return "Water level data stored successfully", 200
 
-@app.route('/store-regen-signal', methods=['POST'])
-# @app.route('/store-regen-signal', methods=['GET'])
+@app.route('/store-water-level', methods=['POST', 'GET'])
+def store_water_level():
+    global water_level_data
+
+    if request.method == 'POST':
+        level = request.data.decode()
+        epoch_time = int(time.time() * 1000)  # milliseconds since epoch
+        current_time = datetime.now()
+        filename = f"{water_level_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Daily files
+
+        with open(filename, 'a') as file:
+            file.write(f"{epoch_time},{level}\n")
+
+        # Check if the water level is above a certain threshold
+        if int(level) > 0.732:
+            # Logic to handle high water level (not implemented here)
+
+        water_level_data.append(level)
+        return "Water level data stored successfully", 200
+
+    elif request.method == 'GET':
+        return jsonify(water_level_data)
+
+@app.route('/store-regen-signal', methods=['POST', 'GET'])
 def store_regen_signal():
-  #   if request.method == 'POST':
-    signal = request.data.decode()
-    epoch_time = int(time.time() * 1000)  # milliseconds since epoch
-    current_time = datetime.now()
-    filename = f"{regen_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
-    # elif request.method == 'GET':
-      #   return jsonify(sensor_data)
-    
-    with open(filename, 'a') as file:
-        file.write(f"{epoch_time},{signal}\n")
-    
-    return "Regeneration signal data stored successfully", 200
+    global regen_data
+
+    if request.method == 'POST':
+        signal = request.data.decode()
+        epoch_time = int(time.time() * 1000)  # milliseconds since epoch
+        current_time = datetime.now()
+        filename = f"{regen_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Daily files
+
+        with open(filename, 'a') as file:
+            file.write(f"{epoch_time},{signal}\n")
+
+        regen_data.append(signal)
+        return "Regeneration signal data stored successfully", 200
+
+    elif request.method == 'GET':
+        return jsonify(regen_data)
 
 @app.route('/set-tank-size', methods=['POST'])
 def set_tank_size():
