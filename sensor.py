@@ -24,6 +24,7 @@ def store_sensor_data():
     
     if request.method == 'POST':
         number = request.data.decode()
+        sensor_data = request.data.decode()
         epoch_time = int(time.time() * 1000)  # milliseconds since epoch
         current_time = datetime.now()
         filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
@@ -31,7 +32,7 @@ def store_sensor_data():
         with open(filename, 'a') as file:
             file.write(f"{epoch_time},{number}\n")
 
-        sensor_data.append(number)
+        
         
         return "Data stored successfully", 200
 
