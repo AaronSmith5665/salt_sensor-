@@ -37,7 +37,7 @@ def store_sensor_data():
         return "Data stored successfully", 200
 
     elif request.method == 'GET':
-        return jsonify(number)
+        return number
 
 @app.route('/delete-sensor-data', methods=['POST'])
 def delete_sensor_data():
