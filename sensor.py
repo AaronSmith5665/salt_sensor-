@@ -19,6 +19,9 @@ sensor_data = []
 
 @app.route('/store-sensor-data', methods=['POST','GET'])
 def store_sensor_data():
+
+    global sensor_data
+    
     if request.method == 'POST':
         number = request.data.decode()
         epoch_time = int(time.time() * 1000)  # milliseconds since epoch
