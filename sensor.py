@@ -16,15 +16,15 @@ os.makedirs(water_level_data_dir, exist_ok=True)
 os.makedirs(regen_data_dir, exist_ok=True)
 
 @app.route('/store-sensor-data', methods=['POST'])
-@app.route('/store-sensor-data', methods=['GET']
+# @app.route('/store-sensor-data', methods=['GET']
 def store_sensor_data():
-    if request.method == 'POST':
-        number = request.data.decode()
-        epoch_time = int(time.time() * 1000)  # milliseconds since epoch
-        current_time = datetime.now()
-        filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
-    elif request.method == 'GET':
-        return jsonify(sensor_data)
+    # if request.method == 'POST':
+    number = request.data.decode()
+    epoch_time = int(time.time() * 1000)  # milliseconds since epoch
+    current_time = datetime.now()
+    filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
+    # elif request.method == 'GET':
+        # return jsonify(sensor_data)
     
     with open(filename, 'a') as file:
         file.write(f"{epoch_time},{number}\n")
@@ -61,15 +61,15 @@ def store_water_level():
     return "Water level data stored successfully", 200
 
 @app.route('/store-regen-signal', methods=['POST'])
-@app.route('/store-regen-signal', methods=['GET'])
+# @app.route('/store-regen-signal', methods=['GET'])
 def store_regen_signal():
-    if request.method == 'POST':
-        signal = request.data.decode()
-        epoch_time = int(time.time() * 1000)  # milliseconds since epoch
-        current_time = datetime.now()
-        filename = f"{regen_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
-    elif request.method == 'GET':
-        return jsonify(sensor_data)
+  #   if request.method == 'POST':
+    signal = request.data.decode()
+    epoch_time = int(time.time() * 1000)  # milliseconds since epoch
+    current_time = datetime.now()
+    filename = f"{regen_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
+    # elif request.method == 'GET':
+      #   return jsonify(sensor_data)
     
     with open(filename, 'a') as file:
         file.write(f"{epoch_time},{signal}\n")
