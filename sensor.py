@@ -15,6 +15,8 @@ os.makedirs(sensor_data_dir, exist_ok=True)
 os.makedirs(water_level_data_dir, exist_ok=True)
 os.makedirs(regen_data_dir, exist_ok=True)
 
+sensor_data = []
+
 @app.route('/store-sensor-data', methods=['POST','GET'])
 def store_sensor_data():
     if request.method == 'POST':
@@ -25,7 +27,9 @@ def store_sensor_data():
     
         with open(filename, 'a') as file:
             file.write(f"{epoch_time},{number}\n")
-    
+
+        sensor_data.append(number)
+        
         return "Data stored successfully", 200
 
     elif request.method == 'GET':
@@ -33,6 +37,8 @@ def store_sensor_data():
 
 @app.route('/delete-sensor-data', methods=['POST'])
 def delete_sensor_data():
+    global sensor_data
+    sensor_data = []
     for filename in os.listdir(sensor_data_dir):
         file_path = os.path.join(sensor_data_dir, filename)
         if os.path.isfile(file_path):
