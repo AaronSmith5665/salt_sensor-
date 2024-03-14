@@ -19,22 +19,21 @@ sensor_data = []
 water_level_data = []
 regen_data = []
 
-@app.route('/store-sensor-data', methods=['POST','GET'])
+@app.route('/store-sensor-data', methods=['POST', 'GET'])
 def store_sensor_data():
-
     global sensor_data
     
     if request.method == 'POST':
         number = request.data.decode()
         epoch_time = int(time.time() * 1000)  # milliseconds since epoch
         current_time = datetime.now()
+        timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')  # Date stamp in format YYYY-MM-DD HH:MM:SS
         filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
     
         with open(filename, 'a') as file:
             file.write(f"{epoch_time},{number}\n")
 
-
-        sensor_data.append(number)       
+        sensor_data.append({'timestamp': timestamp, 'value': number})  # Append timestamp along with value
         
         return "Data stored successfully", 200
 
