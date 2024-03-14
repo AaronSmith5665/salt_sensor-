@@ -67,7 +67,8 @@ def store_water_level():
 
         # Check if the water level is above a certain threshold
         if int(level) > 0.732:
-            # Logic to handle high water level (not implemented here)
+            # Here you can add logic to handle high water level, like sending a notification
+            pass  # Replace 'pass' with your logic
 
         water_level_data.append(level)
         return "Water level data stored successfully", 200
