@@ -18,7 +18,7 @@ os.makedirs(regen_data_dir, exist_ok=True)
 sensor_data = []
 water_level_data = []
 regen_data = []
-tank_size = []
+tank_size = None
 
 @app.route('/store-sensor-data', methods=['POST', 'GET'])
 def store_sensor_data():
