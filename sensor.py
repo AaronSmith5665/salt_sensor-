@@ -94,12 +94,16 @@ def store_regen_signal():
     elif request.method == 'GET':
         return jsonify(regen_data)
 
-@app.route('/set-tank-size', methods=['POST'])
+@app.route('/set-tank-size', methods=['POST', 'GET'])
 def set_tank_size():
-    tank_size = request.data.decode()
-    with open(tank_size_file, 'w') as file:
-        file.write(tank_size)
-    return "Tank size set successfully", 200
+    global tank_size
+    if request.method == 'POST':
+        tank_size = request.data.decode()
+        with open(tank_size_file, 'w') as file:
+            file.write(tank_size)
+        return "Tank size set successfully", 200
+    elif request.method == 'GET':
+        return jsonify(tank_size)
 
 @app.route('/record-salt-refill', methods=['POST'])
 def record_salt_refill():
