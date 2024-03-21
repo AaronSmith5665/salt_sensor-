@@ -18,6 +18,7 @@ os.makedirs(regen_data_dir, exist_ok=True)
 sensor_data = []
 water_level_data = []
 regen_data = []
+tank_size = []
 
 @app.route('/store-sensor-data', methods=['POST', 'GET'])
 def store_sensor_data():
@@ -97,14 +98,21 @@ def store_regen_signal():
 @app.route('/set-tank-size', methods=['POST', 'GET'])
 def set_tank_size():
     global tank_size
+    
     if request.method == 'POST':
         tank_size = request.data.decode()
         with open(tank_size_file, 'w') as file:
             file.write(tank_size)
         return "Tank size set successfully", 200
+        
     elif request.method == 'GET':
-        return jsonify(tank_size)
-
+        try:
+            with open(tank_size_file, 'r') as file:
+                tank_size = file.read()
+            return tank_size, 200
+        except FileNotFoundError:
+            return "Tank size not found", 404
+        
 @app.route('/record-salt-refill', methods=['POST'])
 def record_salt_refill():
     refill_date = datetime.now().strftime('%Y-%m-%d')
