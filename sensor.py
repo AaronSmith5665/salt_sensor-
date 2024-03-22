@@ -118,12 +118,23 @@ def set_tank_size():
         except FileNotFoundError:
             return "Tank size not found", 404
 
-@app.route('/record-salt-refill', methods=['POST'])
+@app.route('/record-salt-refill', methods=['POST', 'GET'])
 def record_salt_refill():
-    refill_date = datetime.now().strftime('%Y-%m-%d')
-    with open(salt_refill_file, 'a') as file:
-        file.write(f"{refill_date}\n")
-    return "Salt refill recorded", 200
+    global salt_refill
+    
+    if request.method == 'POST':
+        refill_date = datetime.now().strftime('%Y-%m-%d')
+        with open(salt_refill_file, 'a') as file:
+            file.write(f"{refill_date}\n")
+        return "Salt refill recorded", 200
+
+    elif request.method == 'GET':
+        try:
+            with open(salt_refill_file, 'r') as file:
+                refill_dates = [line.strip() for line in file.readlines()]
+                return jsonify({"refill_dates": refill_dates}), 200
+        except FileNotFoundError:
+            return jsonify({"refill_dates": []}), 200  # Return an empty list if file not found
 
 @app.route('/camera-feed')
 def camera_feed():
