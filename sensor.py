@@ -103,6 +103,7 @@ def set_tank_size():
         tank_size = request.data.decode()
         with open(tank_size_file, 'w') as file:
             file.write(tank_size)
+        logging.debug("Tank size set to: %s", tank_size)
         return "Tank size set successfully", 200
 
     elif request.method == 'GET':
