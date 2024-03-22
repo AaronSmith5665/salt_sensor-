@@ -98,20 +98,25 @@ def store_regen_signal():
 @app.route('/set-tank-size', methods=['POST', 'GET'])
 def set_tank_size():
     global tank_size
-    
+
     if request.method == 'POST':
         tank_size = request.data.decode()
         with open(tank_size_file, 'w') as file:
             file.write(tank_size)
         return "Tank size set successfully", 200
-        
+
     elif request.method == 'GET':
         try:
             with open(tank_size_file, 'r') as file:
-                tank_size = file.read()
-            return jsonify({"tank_size": tank_size}), 200
+                lines = file.readlines()
+                if lines:
+                    tank_size = lines[-1].strip()  # Get the last value stored in the file
+                    return jsonify({"tank_size": tank_size}), 200
+                else:
+                    return "Tank size not found", 404
         except FileNotFoundError:
             return "Tank size not found", 404
+
         
 @app.route('/record-salt-refill', methods=['POST'])
 def record_salt_refill():
