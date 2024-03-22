@@ -81,19 +81,19 @@ def store_regen_signal():
     global regen_data
 
     if request.method == 'POST':
-        signal = request.data.decode()
         epoch_time = int(time.time() * 1000)  # milliseconds since epoch
         current_time = datetime.now()
         filename = f"{regen_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Daily files
 
         with open(filename, 'a') as file:
-            file.write(f"{epoch_time},{signal}\n")
+            file.write(f"{epoch_time}\n")  # Store only the timestamp
 
-        regen_data.append(signal)
+        regen_data.append(1)  # Append 1 to signify a regen cycle
         return "Regeneration signal data stored successfully", 200
 
     elif request.method == 'GET':
-        return jsonify(regen_data)
+        timestamps = [epoch_time for epoch_time in regen_data]  # Extract timestamps from regen_data
+        return jsonify(timestamps), 200
 
 @app.route('/set-tank-size', methods=['POST', 'GET'])
 def set_tank_size():
