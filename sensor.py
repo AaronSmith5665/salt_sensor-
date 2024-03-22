@@ -100,23 +100,24 @@ def set_tank_size():
     global tank_size
 
     if request.method == 'POST':
-        tank_size = request.data.decode()
+        tank_size_data = request.data.decode()  # Decode request data
         with open(tank_size_file, 'w') as file:
-            file.write(tank_size)
+            file.write(tank_size_data)  # Write tank size data to the file
+        tank_size = tank_size_data  # Update tank size variable
         logging.debug("Tank size set to: %s", tank_size)
         return "Tank size set successfully", 200
 
     elif request.method == 'GET':
         try:
             with open(tank_size_file, 'r') as file:
-                tank_size = file.readline().strip()  # Read the first (and only) line
-                if tank_size:
-                    return jsonify({"tank_size": tank_size}), 200
+                tank_size_data = file.readline().strip()  # Read tank size from file
+                if tank_size_data:
+                    return jsonify({"tank_size": tank_size_data}), 200
                 else:
                     return "Tank size not found", 404
         except FileNotFoundError:
             return "Tank size not found", 404
-        
+
 @app.route('/record-salt-refill', methods=['POST'])
 def record_salt_refill():
     refill_date = datetime.now().strftime('%Y-%m-%d')
