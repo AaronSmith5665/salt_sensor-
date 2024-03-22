@@ -134,7 +134,7 @@ def record_salt_refill():
                 refill_dates = [line.strip() for line in file.readlines()]
                 return jsonify({"refill_dates": refill_dates}), 200
         except FileNotFoundError:
-            return jsonify({"refill_dates": []}), 200  # Return an empty list if file not found
+            return jsonify({"error": "File not found"}), 404  # Return a 404 status code if file not found
 
 @app.route('/camera-feed')
 def camera_feed():
