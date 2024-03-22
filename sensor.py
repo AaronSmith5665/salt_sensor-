@@ -112,7 +112,7 @@ def set_tank_size():
             with open(tank_size_file, 'r') as file:
                 tank_size_data = file.readline().strip()  # Read tank size from file
                 if tank_size_data:
-                    return jsonify({"tank_size": tank_size_data}), 200
+                    return tank_size_data, 200  # Return just the tank size as a response
                 else:
                     return "Tank size not found", 404
         except FileNotFoundError:
