@@ -5,7 +5,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 sensor_data_dir = "sensor-data"
-water_level_data_dir = "water-level-data"
+water_det_data_dir = "water-level-data"
 regen_data_dir = "regen-data"
 tank_size_file = "tank_size.txt"
 salt_refill_file = "salt_refill.txt" 
@@ -52,29 +52,25 @@ def delete_sensor_data():
     return "All sensor data deleted", 200
 
 
-@app.route('/store-water-level', methods=['POST', 'GET'])
-def store_water_level():
-    global water_level_data
+@app.route('/store-water-det', methods=['POST', 'GET'])
+def store_water_det():
+    global water_det_data
 
     if request.method == 'POST':
-        level = request.data.decode()
         epoch_time = int(time.time() * 1000)  # milliseconds since epoch
         current_time = datetime.now()
-        filename = f"{water_level_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Daily files
+        filename = f"{water_det_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Daily files
 
         with open(filename, 'a') as file:
-            file.write(f"{epoch_time},{level}\n")
+            file.write(f"{epoch_time}\n")
 
-        # Check if the water level is above a certain threshold
-        if int(level) > 0.732:
-            # Here you can add logic to handle high water level, like sending a notification
-            pass  # Replace 'pass' with your logic
-
-        water_level_data.append(level)
-        return "Water level data stored successfully", 200
+        water_det_data.append(1)
+        return "Water detection data stored successfully", 200
 
     elif request.method == 'GET':
-        return jsonify(water_level_data)
+        timestamps = [epoch_time for epoch_time in water_det_data]  # Extract timestamps from water_det_data
+        return jsonify(timestamps), 200
+
 
 @app.route('/store-regen-signal', methods=['POST', 'GET'])
 def store_regen_signal():
