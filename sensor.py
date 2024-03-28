@@ -20,6 +20,20 @@ water_level_data = []
 regen_data = []
 tank_size = None
 
+def get_endpoints():
+    endpoints = []
+    for rule in app.url_map.iter_rules():
+        endpoints.append({
+            "endpoint": rule.endpoint,
+            "methods": sorted(rule.methods),
+            "path": str(rule)
+        })
+    return endpoints
+
+@app.route('/registered-endpoints')
+def registered_endpoints():
+    return jsonify(get_endpoints())
+
 @app.route('/store-sensor-data', methods=['POST', 'GET'])
 def store_sensor_data():
     global sensor_data
