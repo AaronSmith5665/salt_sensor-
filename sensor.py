@@ -185,8 +185,8 @@ def index():
                 epoch, value = line.strip().split(',')
                 sensor_data.append([int(epoch), int(value)])
 
-    for filename in sorted(os.listdir(water_level_data_dir)):
-        with open(f"{water_level_data_dir}/{filename}", 'r') as file:
+    for filename in sorted(os.listdir(water_det_data_dir)):
+        with open(f"{water_det_data_dir}/{filename}", 'r') as file:
             for line in file:
                 epoch, level = line.strip().split(',')
                 water_level_data.append([int(epoch), int(level)])
