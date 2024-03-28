@@ -91,29 +91,29 @@ def store_regen_signal():
         timestamps = [epoch_time for epoch_time in regen_data]  # Extract timestamps from regen_data
         return jsonify(timestamps), 200
 
-@app.route('/set-tank-size', methods=['POST', 'GET'])
+@app.route('/set-tank-size', methods=['POST'])
 def set_tank_size():
     global tank_size
 
-    if request.method == 'POST':
-        tank_size_data = request.data.decode()  # Decode request data
-        with open(tank_size_file, 'w') as file:
-            file.write(tank_size_data)  # Write tank size data to the file
-        tank_size = tank_size_data  # Update tank size variable
-        logging.debug("Tank size set to: %s", tank_size)
-        return "Tank size set successfully", 200
+    tank_size_data = request.data.decode()  # Decode request data
+    with open(tank_size_file, 'w') as file:
+        file.write(tank_size_data)  # Write tank size data to the file
+    tank_size = tank_size_data  # Update tank size variable
+    logging.debug("Tank size set to: %s", tank_size)
+    return "Tank size set successfully", 200
 
-    elif request.method == 'GET':
-        try:
-            with open(tank_size_file, 'r') as file:
-                tank_size_data = file.readline().strip()  # Read tank size from file
-                if tank_size_data:
-                    tank_size = int(tank_size_data)  # Convert tank size data to integer
-                    return str(tank_size), 200  # Return the tank size as a string
-                else:
-                    return "Tank size not found", 404
-        except FileNotFoundError:
-            return "Tank size not found", 404
+@app.route('/get-tank-size', methods=['GET'])
+def get_tank_size():
+    try:
+        with open(tank_size_file, 'r') as file:
+            tank_size_data = file.readline().strip()  # Read tank size from file
+            if tank_size_data:
+                tank_size = int(tank_size_data)  # Convert tank size data to integer
+                return str(tank_size), 200  # Return the tank size as a string
+            else:
+                return "Tank size not found", 404
+    except FileNotFoundError:
+        return "Tank size not found", 404
 
 @app.route('/record-salt-refill', methods=['POST', 'GET'])
 def record_salt_refill():
