@@ -287,7 +287,7 @@ def index():
         <script>
             var sensorOptions = {{
                 series: [{{
-                    "name": 'Sensor Value',
+                    "name": 'Sensor Value... did it update',
                     "data": {sensor_data_js}
                 }}],
                 chart: {{
