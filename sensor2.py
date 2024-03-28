@@ -1,87 +1,170 @@
-from flask import Flask, request, render_template_string, send_file
+from flask import Flask, request, render_template_string, send_file, jsonify
 import os
 import time
 from datetime import datetime
 
 app = Flask(__name__)
 sensor_data_dir = "sensor-data"
-water_level_data_dir = "water-level-data"
+water_det_data_dir = "water-level-data"
 regen_data_dir = "regen-data"
-tank_size_file = "tank_size.txt"                                                                                                                                                                                                                                                                                                                                                                      
+tank_size_file = "tank_size.txt"
 salt_refill_file = "salt_refill.txt" 
 
 # Ensure the data directories exist
 os.makedirs(sensor_data_dir, exist_ok=True)
-os.makedirs(water_level_data_dir, exist_ok=True)
+os.makedirs(water_det_data_dir, exist_ok=True)
 os.makedirs(regen_data_dir, exist_ok=True)
 
-@app.route('/store-sensor-data', methods=['POST'])
+sensor_data = []
+water_level_data = []
+regen_data = []
+tank_size = None
+
+def get_endpoints():
+    endpoints = []
+    for rule in app.url_map.iter_rules():
+        endpoints.append({
+            "endpoint": rule.endpoint,
+            "methods": sorted(rule.methods),
+            "path": str(rule)
+        })
+    return endpoints
+
+@app.route('/registered-endpoints')
+def registered_endpoints():
+    return jsonify(get_endpoints())
+
+@app.route('/store-sensor-data', methods=['POST', 'GET'])
 def store_sensor_data():
-    number = request.data.decode()
-    epoch_time = int(time.time() * 1000)  # milliseconds since epoch
-    current_time = datetime.now()
-    filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
+    global sensor_data
     
-    with open(filename, 'a') as file:
-        file.write(f"{epoch_time},{number}\n")
+    if request.method == 'POST':
+        number = request.data.decode()
+        epoch_time = int(time.time() * 1000)  # milliseconds since epoch
+        current_time = datetime.now()
+        timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')  # Date stamp in format YYYY-MM-DD HH:MM:SS
+        filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
     
-    return "Data stored successfully", 200
+        with open(filename, 'a') as file:
+            file.write(f"{epoch_time},{number}\n")
 
-@app.route('/delete-all-data', methods=['POST'])
-def delete_all_data():
-    for directory in [sensor_data_dir, water_level_data_dir, regen_data_dir]:
-        for filename in os.listdir(directory):
-            file_path = os.path.join(directory, filename)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-    return "All data deleted", 200
-
-@app.route('/store-water-level', methods=['POST'])
-def store_water_level():
-    level = request.data.decode()
-    epoch_time = int(time.time() * 1000)  # milliseconds since epoch
-    current_time = datetime.now()
-    filename = f"{water_level_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
-    
-    with open(filename, 'a') as file:
-        file.write(f"{epoch_time},{level}\n")
-    
-    # Check if the water level is above a certain threshold
-    if int(level) > 0.732:
-        # Send a message to the service worker to show a notification
-        message = {
-            "title": "Water Level Alert",
-            "body": "The water level is approaching overflow."
-        }
-        # You need to implement the logic to send this message to the service worker
+        sensor_data.append({'timestamp': timestamp, 'value': number})  # Append timestamp along with value
         
-    return "Water level data stored successfully", 200
+        return "Data stored successfully", 200
 
-@app.route('/store-regen-signal', methods=['POST'])
+    elif request.method == 'GET':
+        return jsonify(sensor_data)
+
+@app.route('/delete-sensor-data', methods=['POST'])
+def delete_sensor_data():
+    global sensor_data
+    sensor_data = []
+    for filename in os.listdir(sensor_data_dir):
+        file_path = os.path.join(sensor_data_dir, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+    return "All sensor data deleted", 200
+
+@app.route('/delete-water-level-data', methods=['POST'])
+def delete_water_level_data():
+    global water_level_data
+    water_level_data = []
+    for filename in os.listdir(water_det_data_dir):
+        file_path = os.path.join(water_det_data_dir, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+    return "All water level data deleted", 200
+
+@app.route('/delete-regen-data', methods=['POST'])
+def delete_regen_data():
+    global regen_data
+    regen_data = []
+    for filename in os.listdir(regen_data_dir):
+        file_path = os.path.join(regen_data_dir, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+    return "All regeneration data deleted", 200
+
+@app.route('/store-water-det', methods=['POST', 'GET'])
+def store_water_det():
+    global water_det_data
+
+    if request.method == 'POST':
+        epoch_time = int(time.time() * 1000)  # milliseconds since epoch
+        current_time = datetime.now()
+        filename = f"{water_det_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Daily files
+
+        with open(filename, 'a') as file:
+            file.write(f"{epoch_time}\n")
+
+        water_det_data.append(1)
+        return "Water detection data stored successfully", 200
+
+    elif request.method == 'GET':
+        timestamps = [epoch_time for epoch_time in water_det_data]  # Extract timestamps from water_det_data
+        return jsonify(timestamps), 200
+
+
+@app.route('/store-regen-signal', methods=['POST', 'GET'])
 def store_regen_signal():
-    signal = request.data.decode()
-    epoch_time = int(time.time() * 1000)  # milliseconds since epoch
-    current_time = datetime.now()
-    filename = f"{regen_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
-    
-    with open(filename, 'a') as file:
-        file.write(f"{epoch_time},{signal}\n")
-    
-    return "Regeneration signal data stored successfully", 200
+    global regen_data
+
+    if request.method == 'POST':
+        epoch_time = int(time.time() * 1000)  # milliseconds since epoch
+        current_time = datetime.now()
+        filename = f"{regen_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Daily files
+
+        with open(filename, 'a') as file:
+            file.write(f"{epoch_time}\n")  # Store only the timestamp
+
+        regen_data.append(1)  # Append 1 to signify a regen cycle
+        return "Regeneration signal data stored successfully", 200
+
+    elif request.method == 'GET':
+        timestamps = [epoch_time for epoch_time in regen_data]  # Extract timestamps from regen_data
+        return jsonify(timestamps), 200
 
 @app.route('/set-tank-size', methods=['POST'])
 def set_tank_size():
-    tank_size = request.data.decode()
+    global tank_size
+
+    tank_size_data = request.data.decode()  # Decode request data
     with open(tank_size_file, 'w') as file:
-        file.write(tank_size)
+        file.write(tank_size_data)  # Write tank size data to the file
+    tank_size = tank_size_data  # Update tank size variable
+    logging.debug("Tank size set to: %s", tank_size)
     return "Tank size set successfully", 200
 
-@app.route('/record-salt-refill', methods=['POST'])
+@app.route('/get-tank-size', methods=['GET'])
+def get_tank_size():
+    try:
+        with open(tank_size_file, 'r') as file:
+            tank_size_data = file.readline().strip()  # Read tank size from file
+            if tank_size_data:
+                tank_size = int(tank_size_data)  # Convert tank size data to integer
+                return str(tank_size), 200  # Return the tank size as a string
+            else:
+                return "Tank size not found", 404
+    except FileNotFoundError:
+        return "Tank size not found", 404
+
+@app.route('/record-salt-refill', methods=['POST', 'GET'])
 def record_salt_refill():
-    refill_date = datetime.now().strftime('%Y-%m-%d')
-    with open(salt_refill_file, 'a') as file:
-        file.write(f"{refill_date}\n")
-    return "Salt refill recorded", 200
+    global salt_refill
+    
+    if request.method == 'POST':
+        refill_date = datetime.now().strftime('%Y-%m-%d')
+        with open(salt_refill_file, 'a') as file:
+            file.write(f"{refill_date}\n")
+        return "Salt refill recorded", 200
+
+    elif request.method == 'GET':
+        try:
+            with open(salt_refill_file, 'r') as file:
+                refill_dates = [line.strip() for line in file.readlines()]
+                return jsonify({"refill_dates": refill_dates}), 200
+        except FileNotFoundError:
+            return jsonify({"error": "File not found"}), 404  # Return a 404 status code if file not found
 
 @app.route('/camera-feed')
 def camera_feed():
@@ -133,13 +216,31 @@ def index():
         <!-- Include ApexCharts -->
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
         <script>
-        function deleteAllData() {{
-            fetch('/delete-all-data', {{ method: 'POST' }})
+        function deleteSensorData() {{
+            fetch('/delete-sensor-data', {{ method: 'POST' }})
             .then(response => response.text())
             .then(data => {{
                 alert(data);
                 location.reload(); // Reload the page to update the chart
             }});
+        }}
+
+        function deleteWaterLevelData() {{
+            fetch('/delete-water-level-data', {{ method: 'POST' }})
+            .then(response => response.text())
+            .then(data => {{
+                alert(data);
+                location.reload();
+            }});
+        }}
+        
+        function deleteRegenData() {{
+            fetch('/delete-regen-data', {{ method: 'POST' }})
+            .then(response => response.text())
+            .then(data => {{
+                alert(data);
+                location.reload();
+        }});
         }}
 
         function setTankSize() {{
@@ -200,7 +301,8 @@ def index():
                     curve: 'smooth'
                 }},
                 title: {{
-XZ                    align: 'left'
+                    text: 'Sensor Data Over Time',
+                    align: 'left'
                 }},
                 tooltip: {{
                     x: {{
@@ -284,7 +386,9 @@ XZ                    align: 'left'
         </script>
 
         <h2>Latest Sensor Data</h2>
-        <button onclick="deleteAllData()">Delete All Data</button>
+        <button onclick="deleteSensorData()">Delete All Sensor Data</button>
+        <button onclick="deleteWaterLevelData()">Delete All Water Level Data</button>
+        <button onclick="deleteRegenData()">Delete All Regeneration Data</button>
         <table border="1">
             <tr>
                 <th>Time</th>
@@ -292,7 +396,7 @@ XZ                    align: 'left'
                 <th>Water Level</th>
                 <th>Regeneration Signal</th>
             </tr>
-            {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_level}</td><td>{regen_signal}</td></tr>" for (epoch, sensor_value), (_, water_level), (_, regen_signal) in zip(sensor_data[-10:], water_level_data[-10:], regen_data[-10:]))}
+          {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_level}</td><td>{regen_signal}</td></tr>" for (epoch, sensor_value), (_, water_level), (_, regen_signal) in zip(sensor_data[-10:], water_level_data[-10:], regen_data[-10:]))}
         </table>
     </body>
     </html>
