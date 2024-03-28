@@ -108,7 +108,8 @@ def set_tank_size():
             with open(tank_size_file, 'r') as file:
                 tank_size_data = file.readline().strip()  # Read tank size from file
                 if tank_size_data:
-                    return tank_size_data, 200  # Return just the tank size as a response
+                    tank_size = int(tank_size_data)  # Convert tank size data to integer
+                    return str(tank_size), 200  # Return the tank size as a string
                 else:
                     return "Tank size not found", 404
         except FileNotFoundError:
