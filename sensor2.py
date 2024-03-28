@@ -7,7 +7,7 @@ app = Flask(__name__)
 sensor_data_dir = "sensor-data"
 water_level_data_dir = "water-level-data"
 regen_data_dir = "regen-data"
-tank_size_file = "tank_size.txt"                                                                                                                                                                                                                                                                                                                                                                   
+tank_size_file = "tank_size.txt"                                                                                                                                                                                                                                                                                                                                                                      
 salt_refill_file = "salt_refill.txt" 
 
 # Ensure the data directories exist
@@ -27,13 +27,14 @@ def store_sensor_data():
     
     return "Data stored successfully", 200
 
-@app.route('/delete-sensor-data', methods=['POST'])
-def delete_sensor_data():
-    for filename in os.listdir(sensor_data_dir):
-        file_path = os.path.join(sensor_data_dir, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-    return "All sensor data deleted", 200
+@app.route('/delete-all-data', methods=['POST'])
+def delete_all_data():
+    for directory in [sensor_data_dir, water_level_data_dir, regen_data_dir]:
+        for filename in os.listdir(directory):
+            file_path = os.path.join(directory, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+    return "All data deleted", 200
 
 @app.route('/store-water-level', methods=['POST'])
 def store_water_level():
@@ -132,8 +133,8 @@ def index():
         <!-- Include ApexCharts -->
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
         <script>
-        function deleteSensorData() {{
-            fetch('/delete-sensor-data', {{ method: 'POST' }})
+        function deleteAllData() {{
+            fetch('/delete-all-data', {{ method: 'POST' }})
             .then(response => response.text())
             .then(data => {{
                 alert(data);
@@ -283,7 +284,7 @@ XZ                    align: 'left'
         </script>
 
         <h2>Latest Sensor Data</h2>
-        <button onclick="deleteSensorData()">Delete All Sensor Data</button>
+        <button onclick="deleteAllData()">Delete All Data</button>
         <table border="1">
             <tr>
                 <th>Time</th>
