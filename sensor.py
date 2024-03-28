@@ -12,7 +12,7 @@ salt_refill_file = "salt_refill.txt"
 
 # Ensure the data directories exist
 os.makedirs(sensor_data_dir, exist_ok=True)
-os.makedirs(water_level_data_dir, exist_ok=True)
+os.makedirs(water_det_data_dir, exist_ok=True)
 os.makedirs(regen_data_dir, exist_ok=True)
 
 sensor_data = []
