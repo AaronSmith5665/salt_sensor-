@@ -279,7 +279,7 @@ def index():
             <h2>Tank Settings</h2>
             <label for="tank-size-input">Tank Size (Liters):</label>
             <input type="number" id="tank-size-input" name="tank-size" min="0">
-            <button onclick="set_tank_size()">Set Tank Size</button>
+            <button onclick="setTankSize()">Set Tank Size</button>
             <br>
             <button onclick="recordSaltRefill()">Record Salt Refill</button>
         </div>
