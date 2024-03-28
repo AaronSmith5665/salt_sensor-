@@ -65,6 +65,25 @@ def delete_sensor_data():
             os.remove(file_path)
     return "All sensor data deleted", 200
 
+@app.route('/delete-water-level-data', methods=['POST'])
+def delete_water_level_data():
+    global water_level_data
+    water_level_data = []
+    for filename in os.listdir(water_det_data_dir):
+        file_path = os.path.join(water_det_data_dir, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+    return "All water level data deleted", 200
+
+@app.route('/delete-regen-data', methods=['POST'])
+def delete_regen_data():
+    global regen_data
+    regen_data = []
+    for filename in os.listdir(regen_data_dir):
+        file_path = os.path.join(regen_data_dir, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+    return "All regeneration data deleted", 200
 
 @app.route('/store-water-det', methods=['POST', 'GET'])
 def store_water_det():
@@ -204,6 +223,24 @@ def index():
                 alert(data);
                 location.reload(); // Reload the page to update the chart
             }});
+        }}
+
+        function deleteWaterLevelData() {{
+            fetch('/delete-water-level-data', {{ method: 'POST' }})
+            .then(response => response.text())
+            .then(data => {{
+                alert(data);
+                location.reload();
+            }});
+        }}
+        
+        function deleteRegenData() {{
+            fetch('/delete-regen-data', {{ method: 'POST' }})
+            .then(response => response.text())
+            .then(data => {{
+                alert(data);
+                location.reload();
+        }});
         }}
 
         function setTankSize() {{
@@ -350,6 +387,8 @@ def index():
 
         <h2>Latest Sensor Data</h2>
         <button onclick="deleteSensorData()">Delete All Sensor Data</button>
+        <button onclick="deleteWaterLevelData()">Delete All Water Level Data</button>
+        <button onclick="deleteRegenData()">Delete All Regeneration Data</button>
         <table border="1">
             <tr>
                 <th>Time</th>
@@ -357,7 +396,7 @@ def index():
                 <th>Water Level</th>
                 <th>Regeneration Signal</th>
             </tr>
-            {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_level}</td><td>{regen_signal}</td></tr>" for (epoch, sensor_value), (_, water_level), (_, regen_signal) in zip(sensor_data[-10:], water_level_data[-10:], regen_data[-10:]))}
+          {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_level}</td><td>{regen_signal}</td></tr>" for (epoch, sensor_value), (_, water_level), (_, regen_signal) in zip(sensor_data[-10:], water_level_data[-10:], regen_data[-10:]))}
         </table>
     </body>
     </html>
