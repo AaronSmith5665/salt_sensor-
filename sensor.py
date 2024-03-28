@@ -2,6 +2,7 @@ from flask import Flask, request, render_template_string, send_file, jsonify
 import os
 import time
 from datetime import datetime
+import logging
 
 app = Flask(__name__)
 sensor_data_dir = "sensor-data"
