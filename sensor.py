@@ -58,6 +58,8 @@ def store_sensor_data():
 @app.route('/delete-sensor-data', methods=['POST'])
 def delete_sensor_data():
     global sensor_data
+    global regen_data
+    regen_data = []
     sensor_data = []
     for filename in os.listdir(sensor_data_dir):
         file_path = os.path.join(sensor_data_dir, filename)
