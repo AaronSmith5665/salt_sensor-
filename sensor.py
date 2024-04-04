@@ -6,7 +6,7 @@ import logging
 
 app = Flask(__name__)
 sensor_data_dir = "sensor-data"
-water_det_data_dir = "water-level-data"
+water_det_data_dir = "water-det-data"
 regen_data_dir = "regen-data"
 tank_size_file = "tank_size.txt"
 salt_refill_file = "salt_refill.txt" 
