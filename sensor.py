@@ -43,7 +43,7 @@ def store_sensor_data():
         number = request.data.decode()
         epoch_time = int(time.time() * 1000)  # milliseconds since epoch
         current_time = datetime.now()
-        timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')  # Date stamp in format YYYY-MM-DD HH:MM:SS
+        timestamp = current_time.strftime('%Y-%m-%d')  # Date stamp in format YYYY-MM-DD
         filename = f"{sensor_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Changed to daily files
     
         with open(filename, 'a') as file:
