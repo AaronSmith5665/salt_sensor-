@@ -278,7 +278,7 @@ def index():
         </div>
         <div style="float: right;">
             <h2>Tank Settings</h2>
-            <label for="tank-size-input">Tank Size (Liters):</label>
+            <label for="tank-size-input">Tank Height (Inches):</label>
             <input type="number" id="tank-size-input" name="tank-size" min="0">
             <button onclick="setTankSize()">Set Tank Size</button>
             <br>
