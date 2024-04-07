@@ -17,7 +17,7 @@ os.makedirs(water_det_data_dir, exist_ok=True)
 os.makedirs(regen_data_dir, exist_ok=True)
 
 sensor_data = []
-water_level_data = []
+water_det_data = []
 regen_data = []
 tank_size = None
 
@@ -66,15 +66,15 @@ def delete_sensor_data():
             os.remove(file_path)
     return "All sensor data deleted", 200
 
-@app.route('/delete-water-level-data', methods=['POST'])
-def delete_water_level_data():
-    global water_level_data
-    water_level_data = []
+@app.route('/delete-water-det-data', methods=['POST'])
+def delete_water_det_data():
+    global water_det_data
+    water_det_data = []
     for filename in os.listdir(water_det_data_dir):
         file_path = os.path.join(water_det_data_dir, filename)
         if os.path.isfile(file_path):
             os.remove(file_path)
-    return "All water level data deleted", 200
+    return "All water detection data deleted", 200
 
 @app.route('/delete-regen-data', methods=['POST'])
 def delete_regen_data():
@@ -176,7 +176,7 @@ def camera_feed():
 @app.route('/')
 def index():
     sensor_data = []
-    water_level_data = []
+    water_det_data = []
     regen_data = []
     
     # Read all files and accumulate data
@@ -190,7 +190,7 @@ def index():
         with open(f"{water_det_data_dir}/{filename}", 'r') as file:
             for line in file:
                 epoch, level = line.strip().split(',')
-                water_level_data.append([int(epoch), int(level)])
+                water_det_data.append([int(epoch), int(level)])
 
     for filename in sorted(os.listdir(regen_data_dir)):
         with open(f"{regen_data_dir}/{filename}", 'r') as file:
@@ -200,12 +200,12 @@ def index():
     
     # Sort the data by timestamp
     sensor_data.sort(key=lambda x: x[0])
-    water_level_data.sort(key=lambda x: x[0])
+    water_det_data.sort(key=lambda x: x[0])
     regen_data.sort(key=lambda x: x[0])
 
     # Prepare data for ApexCharts - using timestamp for x-axis
     sensor_data_js = str([[epoch, value] for epoch, value in sensor_data]).replace("'", "")
-    water_level_data_js = str([[epoch, level] for epoch, level in water_level_data]).replace("'", "")
+    water_det_data_js = str([[epoch, level] for epoch, level in water_det_data]).replace("'", "")
     regen_data_js = str([[epoch, signal] for epoch, signal in regen_data]).replace("'", "")
 
     # HTML content with ApexCharts
@@ -226,8 +226,8 @@ def index():
             }});
         }}
 
-        function deleteWaterLevelData() {{
-            fetch('/delete-water-level-data', {{ method: 'POST' }})
+        function deleteWaterDetData() {{
+            fetch('/delete-water-det-data', {{ method: 'POST' }})
             .then(response => response.text())
             .then(data => {{
                 alert(data);
@@ -271,7 +271,7 @@ def index():
         <div>
             <select id="chart-selector" onchange="changeChart()">
                 <option value="sensor_chart">Sensor Data</option>
-                <option value="water_level_chart">Water Level</option>
+                <option value="water_det_chart">Water Detection</option>
                 <option value="regen_chart">Regeneration Signal</option>
             </select>
             <div id="chart-container" style="height: 350px;"></div>
@@ -312,10 +312,10 @@ def index():
                 }}
             }};
 
-            var waterLevelOptions = {{
+            var waterDetOptions = {{
                 series: [{{
-                    "name": 'Water Level',
-                    "data": {water_level_data_js}
+                    "name": 'Water Detection',
+                    "data": {water_det_data_js}
                 }}],
                 chart: {{
                     type: 'line',
@@ -328,7 +328,7 @@ def index():
                     curve: 'smooth'
                 }},
                 title: {{
-                    text: 'Water Level Over Time',
+                    text: 'Water Detection Over Time',
                     align: 'left'
                 }},
                 tooltip: {{
@@ -366,7 +366,7 @@ def index():
 
             var chartContainer = document.getElementById("chart-container");
             var sensorChart = new ApexCharts(chartContainer, sensorOptions);
-            var waterLevelChart = new ApexCharts(chartContainer, waterLevelOptions);
+            var waterDetChart = new ApexCharts(chartContainer, waterDetOptions);
             var regenChart = new ApexCharts(chartContainer, regenOptions);
 
             var currentChart = sensorChart;
@@ -377,8 +377,8 @@ def index():
                 currentChart.destroy();
                 if (selectedChart === "sensor_chart") {{
                     currentChart = sensorChart;
-                }} else if (selectedChart === "water_level_chart") {{
-                    currentChart = waterLevelChart;
+                }} else if (selectedChart === "water_det_chart") {{
+                    currentChart = waterDetChart;
                 }} else if (selectedChart === "regen_chart") {{
                     currentChart = regenChart;
                 }}
@@ -388,16 +388,16 @@ def index():
 
         <h2>Latest Sensor Data</h2>
         <button onclick="deleteSensorData()">Delete All Sensor Data</button>
-        <button onclick="deleteWaterLevelData()">Delete All Water Level Data</button>
+        <button onclick="deleteWaterDetData()">Delete All Water Detection Data</button>
         <button onclick="deleteRegenData()">Delete All Regeneration Data</button>
         <table border="1">
             <tr>
                 <th>Time</th>
                 <th>Sensor Data</th>
-                <th>Water Level</th>
+                <th>Water Detection</th>
                 <th>Regeneration Signal</th>
             </tr>
-          {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_level}</td><td>{regen_signal}</td></tr>" for (epoch, sensor_value), (_, water_level), (_, regen_signal) in zip(sensor_data[-10:], water_level_data[-10:], regen_data[-10:]))}
+          {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_det}</td><td>{regen_signal}</td></tr>" for (epoch, sensor_value), (_, water_det), (_, regen_signal) in zip(sensor_data[-10:], water_det_data[-10:], regen_data[-10:]))}
         </table>
     </body>
     </html>
