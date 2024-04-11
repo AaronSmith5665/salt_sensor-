@@ -301,7 +301,7 @@ def index():
         var waterDetOptions = {{
                 series: [{{
                     "name": 'Water Detection',
-                    "data": {water_det_data_js}
+                    "data": {water_det_data}
                 }}],
                 chart: {{
                     type: 'line',
