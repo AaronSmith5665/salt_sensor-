@@ -195,8 +195,8 @@ def index():
 
     # Prepare data for ApexCharts - using timestamp for x-axis
     sensor_data_js = str([[epoch, value] for epoch, value in sensor_data]).replace("'", "")
-    water_det_data_js = str([{"timestamp": epoch, "value": "1"} for epoch in water_det_data]).replace("'", "\"")
-    regen_data_js = str([{"timestamp": epoch, "value": "1"} for epoch in regen_data]).replace("'", "\"")  # Consistent object formatting
+    water_det_data_js = str([{"timestamp": epoch, "value": 1} for epoch in water_det_data]).replace("'", "\"")
+    regen_data_js = str([{"timestamp": epoch, "value": 1} for epoch in regen_data]).replace("'", "\"")  # Consistent object formatting
 
     
 
