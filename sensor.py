@@ -301,7 +301,7 @@ def index():
             var waterDetOptions = {{
                 series: [{{
                     "name": 'Water Detection',
-                    "data": {water_det_data_js}
+                    "data": {water_det_data_js.map(point => ({x: point.x, y: 1}))}
                 }}],
                 chart: {{
                     type: 'line',
@@ -327,7 +327,7 @@ def index():
             var regenOptions = {{
                 series: [{{
                     "name": 'Regeneration Signal',
-                    "data": {regen_data_js}
+                    "data": {regen_data_js.map(point => ({x: point.x, y: 1}))}
                 }}],
                 chart: {{
                     type: 'line',
