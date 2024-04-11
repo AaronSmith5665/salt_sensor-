@@ -178,8 +178,12 @@ def index():
     sensor_data = []
     water_det_data = []
     regen_data = []
-    
-    # Read all files and accumulate data
+
+    # Populate water_det_data and regen_data with example data
+    # In actual deployment, this should come from your data handling logic
+    # Example: water_det_data = [1609459200000, 1609462800000, ...]
+
+    # Read sensor data files and accumulate data
     for filename in sorted(os.listdir(sensor_data_dir)):
         with open(f"{sensor_data_dir}/{filename}", 'r') as file:
             for line in file:
@@ -192,7 +196,9 @@ def index():
     # Prepare data for ApexCharts - using timestamp for x-axis
     sensor_data_js = str([[epoch, value] for epoch, value in sensor_data]).replace("'", "")
     water_det_data_js = str([{"timestamp": epoch, "value": "1"} for epoch in water_det_data]).replace("'", "\"")
-    regen_data_js = str([[epoch, 1] for epoch in regen_data]).replace("'", "")  # Represent regeneration signal events as 1
+    regen_data_js = str([{"timestamp": epoch, "value": "1"} for epoch in regen_data]).replace("'", "\"")  # Consistent object formatting
+
+    
 
     # HTML content with ApexCharts
     html_content = f"""
