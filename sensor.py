@@ -194,9 +194,9 @@ def index():
     sensor_data.sort(key=lambda x: x[0])
 
     # Prepare data for ApexCharts - using timestamp for x-axis
-    sensor_data_js = str([{"timestamp": epoch, "value": value} for epoch, value in sensor_data]).replace("'", "\"")
-    water_det_data_js = str([{"timestamp": epoch, "value": 1} for epoch in water_det_data]).replace("'", "\"")
-    regen_data_js = str([{"timestamp": epoch, "value": 1} for epoch in regen_data]).replace("'", "\"")
+    sensor_data_js = str([["timestamp": epoch, "value": value] for epoch, value in sensor_data]).replace("'", "\"")
+    water_det_data_js = str([["timestamp": epoch, "value": 1] for epoch in water_det_data]).replace("'", "\"")
+    regen_data_js = str([["timestamp": epoch, "value": 1] for epoch in regen_data]).replace("'", "\"")
 
     
 
