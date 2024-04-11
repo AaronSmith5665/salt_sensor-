@@ -98,7 +98,7 @@ def store_water_det():
         with open(filename, 'a') as file:
             file.write(f"{epoch_time}\n")
 
-        water_det_data.append(epoch_time)
+        water_det_data.append(current_time.strftime('%Y-%m-%d'))
         return "Water detection data stored successfully", 200
 
     elif request.method == 'GET':
@@ -118,7 +118,7 @@ def store_regen_signal():
         with open(filename, 'a') as file:
             file.write(f"{epoch_time}\n")  # Store only the timestamp
 
-        regen_data.append(epoch_time)
+        regen_data.append(current_time.strftime('%Y-%m-%d'))
         return "Regeneration signal data stored successfully", 200
 
     elif request.method == 'GET':
