@@ -185,28 +185,14 @@ def index():
             for line in file:
                 epoch, value = line.strip().split(',')
                 sensor_data.append([int(epoch), int(value)])
-
-    for filename in sorted(os.listdir(water_det_data_dir)):
-        with open(f"{water_det_data_dir}/{filename}", 'r') as file:
-            for line in file:
-                epoch, level = line.strip().split(',')
-                water_det_data.append([int(epoch), int(level)])
-
-    for filename in sorted(os.listdir(regen_data_dir)):
-        with open(f"{regen_data_dir}/{filename}", 'r') as file:
-            for line in file:
-                epoch, signal = line.strip().split(',')
-                regen_data.append([int(epoch), int(signal)])
     
     # Sort the data by timestamp
     sensor_data.sort(key=lambda x: x[0])
-    water_det_data.sort(key=lambda x: x[0])
-    regen_data.sort(key=lambda x: x[0])
 
     # Prepare data for ApexCharts - using timestamp for x-axis
     sensor_data_js = str([[epoch, value] for epoch, value in sensor_data]).replace("'", "")
-    water_det_data_js = str([[epoch, level] for epoch, level in water_det_data]).replace("'", "")
-    regen_data_js = str([[epoch, signal] for epoch, signal in regen_data]).replace("'", "")
+    water_det_data_js = str([[epoch, 1] for epoch in water_det_data]).replace("'", "")  # Represent water detection events as 1
+    regen_data_js = str([[epoch, 1] for epoch in regen_data]).replace("'", "")  # Represent regeneration signal events as 1
 
     # HTML content with ApexCharts
     html_content = f"""
