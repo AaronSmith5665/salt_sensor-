@@ -191,7 +191,7 @@ def index():
 
     # Prepare data for ApexCharts - using timestamp for x-axis
     sensor_data_js = str([[epoch, value] for epoch, value in sensor_data]).replace("'", "")
-    water_det_data_js = str([[epoch, 1] for epoch in water_det_data]).replace("'", "")  # Represent water detection events as 1
+    water_det_data_js = str([{"timestamp": epoch, "value": "1"} for epoch in water_det_data]).replace("'", "\"")
     regen_data_js = str([[epoch, 1] for epoch in regen_data]).replace("'", "")  # Represent regeneration signal events as 1
 
     # HTML content with ApexCharts
