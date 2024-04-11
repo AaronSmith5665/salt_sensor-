@@ -191,8 +191,8 @@ def index():
 
     # Prepare data for ApexCharts - using timestamp for x-axis
     sensor_data_js = str([[epoch, value] for epoch, value in sensor_data]).replace("'", "")
-    water_det_data_js = str([[epoch] for epoch in water_det_data]).replace("'", "")  # Just timestamps for water detection events
-    regen_data_js = str([[epoch] for epoch in regen_data]).replace("'", "")  # Just timestamps for regeneration signal events
+    water_det_data_js = str([[epoch, 1] for epoch in water_det_data]).replace("'", "")  # Represent water detection events as 1
+    regen_data_js = str([[epoch, 1] for epoch in regen_data]).replace("'", "")  # Represent regeneration signal events as 1
 
     # HTML content with ApexCharts
     html_content = f"""
@@ -301,7 +301,7 @@ def index():
             var waterDetOptions = {{
                 series: [{{
                     "name": 'Water Detection',
-                    "data": {water_det_data_js.map(point => ({x: point.x, y: 1}))}
+                    "data": {water_det_data_js}
                 }}],
                 chart: {{
                     type: 'line',
@@ -327,7 +327,7 @@ def index():
             var regenOptions = {{
                 series: [{{
                     "name": 'Regeneration Signal',
-                    "data": {regen_data_js.map(point => ({x: point.x, y: 1}))}
+                    "data": {regen_data_js}
                 }}],
                 chart: {{
                     type: 'line',
