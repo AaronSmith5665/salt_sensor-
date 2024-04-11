@@ -298,11 +298,11 @@ def index():
                 }}
             }};
 
-        var waterDetOptions = {
-            series: [{
-                "name": 'Water Detection',
-                "data": water_det_data_js.length > 0 ? water_det_data_js : [[new Date().getTime(), 1]]  // Temporary data to test the chart
-            }],
+        var waterDetOptions = {{
+                series: [{{
+                    "name": 'Water Detection',
+                    "data": {water_det_data_js}
+                }}],
                 chart: {{
                     type: 'line',
                     height: 350
