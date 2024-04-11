@@ -93,18 +93,17 @@ def store_water_det():
     if request.method == 'POST':
         epoch_time = int(time.time() * 1000)  # milliseconds since epoch
         current_time = datetime.now()
-        filename = f"{water_det_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"
+        filename = f"{water_det_data_dir}/{current_time.strftime('%Y-%m-%d')}.txt"  # Daily files
 
         with open(filename, 'a') as file:
             file.write(f"{epoch_time}\n")
 
-        # Append both epoch time and a fixed value (1 for water detection)
-        water_det_data.append({'timestamp': epoch_time, 'value': '1'})
+        water_det_data.append(current_time.strftime('%Y-%m-%d'))
         return "Water detection data stored successfully", 200
 
     elif request.method == 'GET':
-        # Format the data correctly for JSON response
-        return jsonify(water_det_data), 200
+        timestamps = [epoch_time for epoch_time in water_det_data]  # Extract timestamps from water_det_data
+        return jsonify(timestamps), 200
 
 
 @app.route('/store-regen-signal', methods=['POST', 'GET'])
