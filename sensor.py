@@ -175,9 +175,7 @@ def camera_feed():
 
 @app.route('/')
 def index():
-    sensor_data = []
-    water_det_data = []
-    regen_data = []
+    global sensor_data, water_det_data, regen_data
 
     # Populate water_det_data and regen_data with example data
     # In actual deployment, this should come from your data handling logic
