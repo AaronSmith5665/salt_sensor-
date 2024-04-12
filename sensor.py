@@ -173,6 +173,16 @@ def camera_feed():
     # In a real scenario, you would capture and return a video frame from your camera
     return send_file("static/camera_image.jpg", mimetype='image/jpeg')
 
+def safe_key_extractor(data):
+    try:
+        # Attempt to return the first element for sorting
+        return data[0]
+    except (IndexError, TypeError) as e:
+        # Log the error and the problematic data
+        print(f"Error accessing the first element for sorting: {e}, Data: {data}")
+        # Return 0 as a fallback sort key
+        return 0
+
 @app.route('/')
 def index():
     global sensor_data, water_det_data, regen_data
@@ -189,7 +199,7 @@ def index():
                 sensor_data.append([int(epoch), int(value)])
     
     # Sort the data by timestamp
-    sensor_data.sort(key=lambda x: x[0])
+    sensor_data.sort(key=safe_key_extractor)
 
     # Read sensor data files and accumulate data
     for filename in sorted(os.listdir(water_det_data_dir)):
