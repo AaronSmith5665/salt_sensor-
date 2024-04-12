@@ -177,7 +177,7 @@ def safe_key_extractor(data):
     try:
         # Attempt to return the first element for sorting
         return data[0]
-    except (IndexError, TypeError) as e:
+    except (IndexError, TypeError, KeyError) as e:
         # Log the error and the problematic data
         print(f"Error accessing the first element for sorting: {e}, Data: {data}")
         # Return 0 as a fallback sort key
