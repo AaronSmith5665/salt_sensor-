@@ -49,7 +49,7 @@ def store_sensor_data():
         with open(filename, 'a') as file:
             file.write(f"{epoch_time},{number}\n")
 
-        sensor_data.append({'timestamp': timestamp, 'value': number})  # Append timestamp along with value
+        #sensor_data.append({'timestamp': timestamp, 'value': number})  # Append timestamp along with value
         
         return "Data stored successfully", 200
 
