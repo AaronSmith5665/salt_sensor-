@@ -209,12 +209,19 @@ def index():
                 epoch = line.strip()
                 water_det_data.append([int(epoch), 1])
 
+        # Read water detection data files and accumulate data
+    for filename in sorted(os.listdir(regen_data_dir)):
+        with open(f"{regen_data_dir}/{filename}", 'r') as file:
+            for line in file:
+                epoch = line.strip()
+                water_det_data.append([int(epoch), 1])
+
     # You might want to similarly handle regeneration data...
 
     # Generate JavaScript-compatible data strings for Google Charts
     sensor_data_js = [[epoch, value] for epoch, value in sensor_data]
     water_det_data_js = [[epoch, value] for epoch, value in water_det_data]
-    regen_data_js = [[epoch, 1] for epoch in regen_data]  # Example; adjust as needed
+    regen_data_js = [[epoch, value] for epoch, value in regen_data]
 
     table_rows = "".join(
     f"<tr><td>{datetime.fromtimestamp(epoch/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_det}</td><td>{regen_signal}</td></tr>"
