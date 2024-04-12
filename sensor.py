@@ -191,10 +191,20 @@ def index():
     # Sort the data by timestamp
     sensor_data.sort(key=lambda x: x[0])
 
+    # Read sensor data files and accumulate data
+    for filename in sorted(os.listdir(water_det_data_dir)):
+        with open(f"{water_det_data_dir}/{filename}", 'r') as file:
+            for line in file:
+                epoch = line.strip()
+                water_det_data.append([int(epoch), 1])
+    
+    # Sort the data by timestamp
+    water_det_data.sort(key=lambda x: x[0])
+
     # Prepare data for ApexCharts - using timestamp for x-axis
     sensor_data_js = str([[epoch, value] for epoch, value in sensor_data]).replace("'", "")
-    water_det_data_js = str([{"timestamp": epoch, "value": "1"} for epoch in water_det_data]).replace("'", "\"")
-    regen_data_js = str([{"timestamp": epoch, "value": "1"} for epoch in regen_data]).replace("'", "\"")
+    water_det_data_js = str([[epoch, 1] for epoch in water_det_data]).replace("'", "")
+    regen_data_js = str([[epoch, 1] for epoch in regen_data]).replace("'", "")
 
     
 
