@@ -214,7 +214,7 @@ def index():
         with open(f"{regen_data_dir}/{filename}", 'r') as file:
             for line in file:
                 epoch = line.strip()
-                water_det_data.append([int(epoch), 1])
+                regen_data.append([int(epoch), 1])
 
     # You might want to similarly handle regeneration data...
 
