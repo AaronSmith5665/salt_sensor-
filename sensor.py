@@ -213,7 +213,7 @@ def index():
 
     # Generate JavaScript-compatible data strings for Google Charts
     sensor_data_js = [[epoch, value] for epoch, value in sensor_data]
-    water_det_data_js = [[epoch, 1] for epoch in water_det_data]
+    water_det_data_js = [[epoch, value] for epoch, value in water_det_data]
     regen_data_js = [[epoch, 1] for epoch in regen_data]  # Example; adjust as needed
 
     table_rows = "".join(
