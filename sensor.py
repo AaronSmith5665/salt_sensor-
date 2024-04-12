@@ -187,9 +187,13 @@ def safe_key_extractor(data):
 def index():
     global sensor_data, water_det_data, regen_data
 
-    # Populate water_det_data and regen_data with example data
-    # In actual deployment, this should come from your data handling logic
-    # Example: water_det_data = [1609459200000, 1609462800000, ...]
+    # sensor_data_dir = "path/to/sensor_data"
+    # water_det_data_dir = "path/to/water_det_data"
+
+    # Populate sensor_data, water_det_data, and regen_data
+    sensor_data = []
+    water_det_data = []
+    regen_data = []
 
     # Read sensor data files and accumulate data
     for filename in sorted(os.listdir(sensor_data_dir)):
@@ -198,205 +202,139 @@ def index():
                 epoch, value = line.strip().split(',')
                 sensor_data.append([int(epoch), int(value)])
     
-    # Sort the data by timestamp
-    sensor_data.sort(key=safe_key_extractor)
-
-    # Read sensor data files and accumulate data
+    # Read water detection data files and accumulate data
     for filename in sorted(os.listdir(water_det_data_dir)):
         with open(f"{water_det_data_dir}/{filename}", 'r') as file:
             for line in file:
                 epoch = line.strip()
                 water_det_data.append([int(epoch), 1])
-    
-    # Sort the data by timestamp
-    water_det_data.sort(key=lambda x: x[0])
 
-    # Prepare data for ApexCharts - using timestamp for x-axis
-    sensor_data_js = str([[epoch, value] for epoch, value in sensor_data]).replace("'", "")
-    water_det_data_js = str([[epoch, 1] for epoch in water_det_data]).replace("'", "")
-    regen_data_js = str([[epoch, 1] for epoch in regen_data]).replace("'", "")
+    # You might want to similarly handle regeneration data...
 
-    
+    # Generate JavaScript-compatible data strings for Google Charts
+    sensor_data_js = [[epoch, value] for epoch, value in sensor_data]
+    water_det_data_js = [[epoch, 1] for epoch in water_det_data]
+    regen_data_js = [[epoch, 1] for epoch in regen_data]  # Example; adjust as needed
 
-    # HTML content with ApexCharts
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Sensor Data Dashboard</title>
-        <!-- Include ApexCharts -->
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-        <script>
-        function deleteSensorData() {{
-            fetch('/delete-sensor-data', {{ method: 'POST' }})
+    table_rows = "".join(
+    f"<tr><td>{datetime.fromtimestamp(epoch/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_det}</td><td>{regen_signal}</td></tr>"
+    for (epoch, sensor_value), (_, water_det), (_, regen_signal) in zip(sensor_data[-10:], water_det_data[-10:], regen_data[-10:])
+    )
+
+    return render_template_string(HTML_CONTENT, sensor_data_js=sensor_data_js,table_rows = table_rows, water_det_data_js=water_det_data_js, regen_data_js=regen_data_js)
+
+HTML_CONTENT = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sensor Data Dashboard</title>
+    <!-- Load Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart(ChartType) {
+        ChartType = ChartType || "Sensor Data"
+        var data = new google.visualization.DataTable();
+        data.addColumn('datetime', 'Time');
+        data.addColumn('number', 'Value');
+
+        var sensorData = {{ sensor_data_js }};
+        var waterDetData = {{ water_det_data_js }};
+        var regenData = {{ regen_data_js }};
+
+        var chartData = {
+          'Sensor Data': sensorData,
+          'Water Detection': waterDetData,
+          'Regeneration Signal': regenData
+        }[ChartType];
+
+
+        // Start with Sensor Data as default
+        chartData.forEach(function(row) {
+          data.addRow([new Date(row[0]), row[1]]);
+        });
+
+        var options = {
+          title: 'Sensor Data Over Time',
+          curveType: 'function',
+          legend: { position: 'bottom' },
+          hAxis: {
+            format: 'dd MMM yyyy HH:mm:ss'
+          },
+          height: 350
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart-container'));
+        chart.draw(data, options);
+      }
+
+      function changeChart() {
+        var chartType = document.getElementById("chart-selector").value;
+        drawChart(chartType);
+      }
+    </script>
+
+    <script>
+        function deleteSensorData() {
+            fetch('/delete-sensor-data', { method: 'POST' })
             .then(response => response.text())
-            .then(data => {{
+            .then(data => {
                 alert(data);
                 location.reload(); // Reload the page to update the chart
-            }});
-        }}
+            });
+        }
 
-        function deleteWaterDetData() {{
-            fetch('/delete-water-det-data', {{ method: 'POST' }})
+        function deleteWaterDetData() {
+            fetch('/delete-water-det-data', { method: 'POST' })
             .then(response => response.text())
-            .then(data => {{
+            .then(data => {
                 alert(data);
                 location.reload();
-            }});
-        }}
+            });
+        }
         
-        function deleteRegenData() {{
-            fetch('/delete-regen-data', {{ method: 'POST' }})
+        function deleteRegenData() {
+            fetch('/delete-regen-data', { method: 'POST' })
             .then(response => response.text())
-            .then(data => {{
+            .then(data => {
                 alert(data);
                 location.reload();
-        }});
-        }}
+        });
+        }
 
-        function setTankSize() {{
+        function setTankSize() {
             var tankSize = document.getElementById("tank-size-input").value;
-            fetch('/set-tank-size', {{
+            fetch('/set-tank-size', {
                 method: 'POST',
                 body: tankSize
-            }})
+            })
             .then(response => response.text())
-            .then(data => {{
+            .then(data => {
                 alert(data);
-            }});
-        }}
+            });
+        }
 
-        function recordSaltRefill() {{
-            fetch('/record-salt-refill', {{ method: 'POST' }})
+        function recordSaltRefill() {
+            fetch('/record-salt-refill', { method: 'POST' })
             .then(response => response.text())
-            .then(data => {{
+            .then(data => {
                 alert(data);
-            }});
-        }}
+            });
+        }
         </script>
-    </head>
-    
-    <body>
-        <h1>Sensor Data Dashboard</h1>
-        <div>
-            <select id="chart-selector" onchange="changeChart()">
-                <option value="sensor_chart">Sensor Data</option>
-                <option value="water_det_chart">Water Detection</option>
-                <option value="regen_chart">Regeneration Signal</option>
-            </select>
-            <div id="chart-container" style="height: 350px;"></div>
-        </div>
-        <div style="float: right;">
-            <h2>Tank Settings</h2>
-            <label for="tank-size-input">Tank Height (Inches):</label>
-            <input type="number" id="tank-size-input" name="tank-size" min="0">
-            <button onclick="setTankSize()">Set Tank Size</button>
-            <br>
-            <button onclick="recordSaltRefill()">Record Salt Refill</button>
-        </div>
-        <div style="clear: both;"></div>
-        <script>
-            var sensorOptions = {{
-                series: [{{
-                    "name": 'Sensor Value',
-                    "data": {sensor_data_js}
-                }}],
-                chart: {{
-                    type: 'line',
-                    height: 350
-                }},
-                xaxis: {{
-                    type: 'datetime',
-                }},
-                stroke: {{
-                    curve: 'smooth'
-                }},
-                title: {{
-                    text: 'Sensor Data Over Time',
-                    align: 'left'
-                }},
-                tooltip: {{
-                    x: {{
-                        format: 'dd MMM yyyy HH:mm:ss'
-                    }}
-                }}
-            }};
+</head>
+<body>
+    <h1>Sensor Data Dashboard</h1>
+    <select id="chart-selector" onchange="changeChart()">
+        <option value="Sensor Data">Sensor Data</option>
+        <option value="Water Detection">Water Detection</option>
+        <option value="Regeneration Signal">Regeneration Signal</option>
+    </select>
+    <div id="chart-container" style="height: 350px;"></div>
 
-        var waterDetOptions = {{
-                series: [{{
-                    "name": 'Water Detection',
-                    "data": {water_det_data_js}
-                }}],
-                chart: {{
-                    type: 'line',
-                    height: 350
-                }},
-                xaxis: {{
-                    type: 'datetime',
-                }},
-                stroke: {{
-                    curve: 'smooth'
-                }},
-                title: {{
-                    text: 'Water Detection Over Time',
-                    align: 'left'
-                }},
-                tooltip: {{
-                    x: {{
-                        format: 'dd MMM yyyy HH:mm:ss'
-                    }}
-                }}
-            }};
-
-            var regenOptions = {{
-                series: [{{
-                    "name": 'Regeneration Signal',
-                    "data": {regen_data_js}
-                }}],
-                chart: {{
-                    type: 'line',
-                    height: 350
-                }},
-                xaxis: {{
-                    type: 'datetime',
-                }},
-                stroke: {{
-                    curve: 'smooth'
-                }},
-                title: {{
-                    text: 'Regeneration Signals Over Time',
-                    align: 'left'
-                }},
-                tooltip: {{
-                    x: {{
-                        format: 'dd MMM yyyy HH:mm:ss'
-                    }}
-                }}
-            }};
-
-            var chartContainer = document.getElementById("chart-container");
-            var sensorChart = new ApexCharts(chartContainer, sensorOptions);
-            var waterDetChart = new ApexCharts(chartContainer, waterDetOptions);
-            var regenChart = new ApexCharts(chartContainer, regenOptions);
-
-            var currentChart = sensorChart;
-            currentChart.render();
-
-            function changeChart() {{
-                var selectedChart = document.getElementById("chart-selector").value;
-                currentChart.destroy();
-                if (selectedChart === "sensor_chart") {{
-                    currentChart = sensorChart;
-                }} else if (selectedChart === "water_det_chart") {{
-                    currentChart = waterDetChart;
-                }} else if (selectedChart === "regen_chart") {{
-                    currentChart = regenChart;
-                }}
-                currentChart.render();
-            }}
-        </script>
-
-        <h2>Latest Sensor Data</h2>
+            <h2>Latest Sensor Data</h2>
         <button onclick="deleteSensorData()">Delete All Sensor Data</button>
         <button onclick="deleteWaterDetData()">Delete All Water Detection Data</button>
         <button onclick="deleteRegenData()">Delete All Regeneration Data</button>
@@ -407,12 +345,12 @@ def index():
                 <th>Water Detection</th>
                 <th>Regeneration Signal</th>
             </tr>
-          {"".join(f"<tr><td>{datetime.fromtimestamp(int(epoch)/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_det}</td><td>{regen_signal}</td></tr>" for (epoch, sensor_value), (_, water_det), (_, regen_signal) in zip(sensor_data[-10:], water_det_data[-10:], regen_data[-10:]))}
+          {{table_rows}}
         </table>
-    </body>
-    </html>
-    """
-    return render_template_string(html_content)
+
+</body>
+</html>
+"""
 
 if __name__ == '__main__':
     app.run(debug=True)
