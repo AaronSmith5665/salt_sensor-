@@ -257,12 +257,12 @@ HTML_CONTENT = """
           'Regeneration Signal': regenData
         }[ChartType];
 
-        chartData.forEach(function(row) {
-          data.addRow([new Date(row[0]), row[1]]);
-        });
+        data.addRows(chartData.map(function(row) {
+          return [new Date(row[0]), row[1]];
+        }));
 
         var options = {
-          title: 'Sensor Data Over Time',
+          title: ChartType + ' Over Time',
           curveType: 'function',
           legend: { position: 'bottom' },
           hAxis: {
@@ -274,13 +274,14 @@ HTML_CONTENT = """
         var chart = new google.visualization.LineChart(document.getElementById('chart-container'));
         chart.draw(data, options);
 
-        // Draw table for sensor data
+        // Draw table
         var tableData = new google.visualization.DataTable();
         tableData.addColumn('datetime', 'Time');
         tableData.addColumn('number', 'Value');
-        sensorData.forEach(function(row) {
+        chartData.forEach(function(row) {
           tableData.addRow([new Date(row[0]), row[1]]);
         });
+
         var table = new google.visualization.Table(document.getElementById('table-container'));
         table.draw(tableData, {showRowNumber: true, width: '100%', height: '100%'});
       }
