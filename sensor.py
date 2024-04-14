@@ -257,8 +257,6 @@ HTML_CONTENT = """
           'Regeneration Signal': regenData
         }[ChartType];
 
-
-        // Start with Sensor Data as default
         chartData.forEach(function(row) {
           data.addRow([new Date(row[0]), row[1]]);
         });
@@ -281,56 +279,55 @@ HTML_CONTENT = """
         var chartType = document.getElementById("chart-selector").value;
         drawChart(chartType);
       }
-    </script>
 
-    <script>
-        function deleteSensorData() {
-            fetch('/delete-sensor-data', { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-                location.reload(); // Reload the page to update the chart
-            });
-        }
-
-        function deleteWaterDetData() {
-            fetch('/delete-water-det-data', { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-                location.reload();
-            });
-        }
-        
-        function deleteRegenData() {
-            fetch('/delete-regen-data', { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-                location.reload();
+      function deleteSensorData() {
+        fetch('/delete-sensor-data', { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            location.reload();
         });
-        }
+      }
 
-        function setTankSize() {
-            var tankSize = document.getElementById("tank-size-input").value;
-            fetch('/set-tank-size', {
-                method: 'POST',
-                body: tankSize
-            })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-            });
-        }
+      function deleteWaterDetData() {
+        fetch('/delete-water-det-data', { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            location.reload();
+        });
+      }
 
-        function recordSaltRefill() {
-            fetch('/record-salt-refill', { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-            });
-        }
-        </script>
+      function deleteRegenData() {
+        fetch('/delete-regen-data', { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            location.reload();
+        });
+      }
+
+      function setTankSize() {
+        var tankSize = document.getElementById("tank-size-input").value;
+        fetch('/set-tank-size', {
+            method: 'POST',
+            headers: {'Content-Type': 'text/plain'},
+            body: tankSize
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+        });
+      }
+
+      function recordSaltRefill() {
+        fetch('/record-salt-refill', { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+        });
+      }
+    </script>
 </head>
 <body>
     <h1>Sensor Data Dashboard</h1>
@@ -341,19 +338,24 @@ HTML_CONTENT = """
     </select>
     <div id="chart-container" style="height: 350px;"></div>
 
-            <h2>Latest Sensor Data</h2>
-        <button onclick="deleteSensorData()">Delete All Sensor Data</button>
-        <button onclick="deleteWaterDetData()">Delete All Water Detection Data</button>
-        <button onclick="deleteRegenData()">Delete All Regeneration Data</button>
-        <table border="1">
-            <tr>
-                <th>Time</th>
-                <th>Sensor Data</th>
-                <th>Water Detection</th>
-                <th>Regeneration Signal</th>
-            </tr>
-          {{table_rows}}
-        </table>
+    <h2>Latest Sensor Data</h2>
+    <button onclick="deleteSensorData()">Delete All Sensor Data</button>
+    <button onclick="deleteWaterDetData()">Delete All Water Detection Data</button>
+    <button onclick="deleteRegenData()">Delete All Regeneration Data</button>
+
+    <h2>Set Tank Size</h2>
+    <input type="text" id="tank-size-input" placeholder="Enter Tank Size">
+    <button onclick="setTankSize()">Set Tank Size</button>
+
+    <table border="1">
+        <tr>
+            <th>Time</th>
+            <th>Sensor Data</th>
+            <th>Water Detection</th>
+            <th>Regeneration Signal</th>
+        </tr>
+        {{table_rows}}
+    </table>
 
 </body>
 </html>
