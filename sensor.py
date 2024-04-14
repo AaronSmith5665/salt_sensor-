@@ -238,11 +238,11 @@ HTML_CONTENT = """
     <!-- Load Google Charts -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
+      google.charts.load('current', {'packages':['corechart', 'table']});
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart(ChartType) {
-        ChartType = ChartType || "Sensor Data"
+        ChartType = ChartType || "Sensor Data";
         var data = new google.visualization.DataTable();
         data.addColumn('datetime', 'Time');
         data.addColumn('number', 'Value');
@@ -273,6 +273,16 @@ HTML_CONTENT = """
 
         var chart = new google.visualization.LineChart(document.getElementById('chart-container'));
         chart.draw(data, options);
+
+        // Draw table for sensor data
+        var tableData = new google.visualization.DataTable();
+        tableData.addColumn('datetime', 'Time');
+        tableData.addColumn('number', 'Value');
+        sensorData.forEach(function(row) {
+          tableData.addRow([new Date(row[0]), row[1]]);
+        });
+        var table = new google.visualization.Table(document.getElementById('table-container'));
+        table.draw(tableData, {showRowNumber: true, width: '100%', height: '100%'});
       }
 
       function changeChart() {
@@ -337,6 +347,7 @@ HTML_CONTENT = """
         <option value="Regeneration Signal">Regeneration Signal</option>
     </select>
     <div id="chart-container" style="height: 350px;"></div>
+    <div id="table-container" style="height: 300px;"></div>
 
     <h2>Latest Sensor Data</h2>
     <button onclick="deleteSensorData()">Delete All Sensor Data</button>
