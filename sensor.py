@@ -347,16 +347,6 @@ HTML_CONTENT = """
     <input type="text" id="tank-size-input" placeholder="Enter Tank Size">
     <button onclick="setTankSize()">Set Tank Size</button>
 
-    <table border="1">
-        <tr>
-            <th>Time</th>
-            <th>Sensor Data</th>
-            <th>Water Detection</th>
-            <th>Regeneration Signal</th>
-        </tr>
-        {{table_rows}}
-    </table>
-
 </body>
 </html>
 """
