@@ -224,11 +224,19 @@ def index():
     regen_data_js = [[epoch, value] for epoch, value in regen_data]
 
     table_rows = "".join(
-    f"<tr><td>{datetime.fromtimestamp(epoch/1000).strftime('%Y-%m-%d %H:%M:%S')}</td><td>{sensor_value}</td><td>{water_det}</td><td>{regen_signal}</td></tr>"
-    for (epoch, sensor_value), (_, water_det), (_, regen_signal) in zip(sensor_data[-10:], water_det_data[-10:], regen_data[-10:])
+        f"<tr><td>{datetime.fromtimestamp(epoch/1000).strftime('%Y-%m-%d %H:%M:%S')}</td>"
+        f"<td>{sensor_value}</td><td>{water_det}</td><td>{regen_signal}</td></tr>"
+        for (epoch, sensor_value), (_, water_det), (_, regen_signal) 
+        in zip(sensor_data[-10:], water_det_data[-10:], regen_data[-10:])
     )
 
-    return render_template_string(HTML_CONTENT, sensor_data_js=sensor_data_js,table_rows = table_rows, water_det_data_js=water_det_data_js, regen_data_js=regen_data_js)
+    return render_template_string(
+        HTML_CONTENT,
+        sensor_data_js=sensor_data_js,
+        table_rows = table_rows,
+        water_det_data_js=water_det_data_js,
+        regen_data_js=regen_data_js
+    )
 
 HTML_CONTENT = """
 <!DOCTYPE html>
